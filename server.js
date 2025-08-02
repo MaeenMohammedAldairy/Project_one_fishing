@@ -2,7 +2,7 @@ const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 // استخدم middleware
 app.use(express.json()); // لتحليل بيانات JSON
