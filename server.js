@@ -12,10 +12,10 @@ app.use(cors()); // للسماح بالوصول من مصادر مختلفة
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com', // اسم خادم SMTP لـ Gmail
     port: 465, // المنفذ القياسي للاتصال الآمن (SSL)
-    secure: true, // يجب أن تكون "true" للمنفذ 465
+    secure: false, // يجب أن تكون "true" للمنفذ 465
     auth: {
         user: 'maeen.mohammedaldeiry@gmail.com', // تم تعيين البريد الإلكتروني مباشرة
-        pass: 'knne gnrx yauy giyc', // ضع كلمة مرور التطبيق هنا
+        pass: 'jxal wdvx geyd ioqq', // ضع كلمة مرور التطبيق هنا
     }
 });
 
